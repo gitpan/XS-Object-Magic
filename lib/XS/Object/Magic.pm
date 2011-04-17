@@ -6,7 +6,7 @@ use warnings;
 require 5.008001;
 use parent qw(DynaLoader);
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 $VERSION = eval $VERSION;
 
 sub dl_load_flags { 0x01 }
@@ -68,7 +68,9 @@ XS::Object::Magic - Opaque, extensible XS pointer backed objects using C<sv_magi
 
 	void foo (SV *self)
 		PREINIT:
-			my_struct_t *thingy = xs_object_magic_get_struct_rv(aTHX_ self)
+			my_struct_t *thingy;
+		INIT:
+			thingy = xs_object_magic_get_struct_rv(aTHX_ self);
 		CODE:
 			my_struct_foo(thingy); /* delegate to C api */
 
