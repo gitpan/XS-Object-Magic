@@ -6,7 +6,7 @@ use warnings;
 require 5.008001;
 use parent qw(DynaLoader);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 $VERSION = eval $VERSION;
 
 sub dl_load_flags { 0x01 }
@@ -87,7 +87,7 @@ XS::Object::Magic - Opaque, extensible XS pointer backed objects using C<sv_magi
 	my_struct_foo (thingy)
 		my_struct_t *thingy;
 
-	
+
 	/* don't forget a destructor */
 	void
 	DESTROY (my_struct_t *thingy)
@@ -170,6 +170,46 @@ Can be used to easily create a constructor:
 				gv_stashpv(class, 0)
 			);
 		OUTPUT: RETVAL
+
+=item int xs_object_magic_has_struct(aTHX_ SV *sv)
+
+Returns 1 if the SV has XS::Object::Magic magic, 0 otherwise.
+
+=item int xs_object_magic_has_struct_rv(aTHX_ SV *self)
+
+Returns 1 if the SV references an SV that has XS::Object::Magic magic,
+0 otherwise.
+
+This lets you write a quick predicate method, like:
+
+    void
+    my_struct_has_struct (self)
+            SV *self;
+            PPCODE:
+                    EXTEND(SP, 1);
+                    if(xs_object_magic_has_struct_rv(aTHX_ self))
+                            PUSHs(&PL_sv_yes);
+                    else
+                            PUSHs(&PL_sv_no);
+
+Then you can check for the existence of your struct from the Perl
+side:
+
+    if( $object->has_struct ) { ... }
+
+=item int xs_object_magic_detach_struct(aTHX_ SV *sv)
+
+Removes the XS::Object::Magic magic from the given SV.  Returns 1 if
+something is removed, 0 otherwise.
+
+=item int xs_object_magic_detach_struct_rv(aTHX_ SV *self)
+
+Likes C<xs_object_magic_detach_struct>, but takes a reference to the
+magic-containing SV instead of the SV itself.  The reference to the SV
+is typically C<$self>.
+
+Returns 0 if the SV is not a reference, otherwise returns whatever
+C<xs_object_magic_detach_struct> returns.
 
 =back
 
